@@ -32,6 +32,16 @@ import {
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { createCollection } from "@/actions/collection";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { Separator } from "./ui/separator";
+import { Button } from "./ui/button";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 interface Props {
   open: boolean;
@@ -103,10 +113,70 @@ const CreateCollectionSheet = ({ open, onOpenChange }: Props) => {
               )}
             />
 
-            
+            <FormField
+              control={form.control}
+              name="color"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Color</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={(color) => field.onChange(color)}>
+                      <SelectTrigger
+                        className={cn(
+                          "w-full h-8 text-white",
+                          CollectionColors[field.value as CollectionColor]
+                        )}
+                      >
+                        <SelectValue
+                          placeholder="Color"
+                          className="w-full h-8"
+                        />
+                      </SelectTrigger>
 
+                      <SelectContent className="w-full">
+                        {Object.keys(CollectionColors).map((color) => (
+                          <SelectItem
+                            key={color}
+                            value={color}
+                            className={cn(
+                              "w-full h-8 rounded-md my-1 text-white focus:text-white focus:font-bold ring-neutral-600 focus:ring-inset dark:focus:ring-white focus:px-8",
+                              CollectionColors[color as CollectionColor]
+                            )}
+                          >
+                            {color}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormDescription>
+                    Select a color for your collection
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </form>
         </Form>
+
+        <div className="flex flex-col gap-3 mt-4">
+          <Separator />
+
+          <Button
+            className={cn(
+              form.watch("color") &&
+                CollectionColors[form.getValues("color") as CollectionColor]
+            )}
+            variant={"outline"}
+            disabled={form.formState.isSubmitting}
+            onClick={form.handleSubmit(onSubmit)}
+          >
+            Confirm
+            {form.formState.isSubmitting && (
+              <ReloadIcon className="ml-2 h-4 w-4 animate-spin" />
+            )}
+          </Button>
+        </div>
       </SheetContent>
     </Sheet>
   );
