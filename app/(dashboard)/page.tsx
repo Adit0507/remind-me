@@ -2,6 +2,8 @@ import CreateCollectionBtn from "@/components/CreateCollectionBtn";
 import SadFace from "@/components/icons/SadFace";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import CollectionCard from "@/components/CollectionCard";
+
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs";
 import { Suspense } from "react";
@@ -71,4 +73,15 @@ async function CollectionList() {
       </div>
     );
   }
+
+  return (
+    <>
+      <CreateCollectionBtn />
+      <div className="flex flex-col gap-4 mt-4">
+        {collections.map((collection) => (
+          <CollectionCard key={collection.id} collection={collection} />
+        ))}
+      </div>
+    </>
+  );
 }
