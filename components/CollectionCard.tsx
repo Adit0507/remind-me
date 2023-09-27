@@ -1,6 +1,6 @@
 "use client";
 
-import { Collection } from "@prisma/client";
+import { Collection, Task } from "@prisma/client";
 import React, { useState, useTransition } from "react";
 import {
   Collapsible,
@@ -23,6 +23,8 @@ import {
 } from "./ui/alert-dialog";
 import { toast } from "./ui/use-toast";
 
+import CreateTaskDialog from "./CreateTaskDialog";
+
 import { cn } from "@/lib/utils";
 import { CollectionColor, CollectionColors } from "@/lib/constants";
 import { CaretDownIcon, CaretUpIcon, TrashIcon } from "@radix-ui/react-icons";
@@ -30,16 +32,20 @@ import { deleteCollection } from "@/actions/collection";
 import { useRouter } from "next/navigation";
 
 interface Props {
-  collection: Collection;
+  collection: Collection & {
+    tasks: Task[];
+  };
 }
-
-const tasks: string[] = [];
 
 const CollectionCard = ({ collection }: Props) => {
   const [isOpen, setIsOpen] = useState(true);
   const [isLoading, startTranstion] = useTransition();
 
   const router = useRouter();
+
+  const tasks = collection.tasks;
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const removeCollection = async () => {
     try {
@@ -63,12 +69,18 @@ const CollectionCard = ({ collection }: Props) => {
 
   return (
     <>
+      <CreateTaskDialog
+        open={showCreateModal}
+        setOpen={setShowCreateModal}
+        collection={collection}
+      />
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <Button
             variant={"ghost"}
             className={cn(
               "flex w-full justify-between p-6",
+              isOpen && "rounded-b-none",
               CollectionColors[collection.color as CollectionColor]
             )}
           >
@@ -85,8 +97,8 @@ const CollectionCard = ({ collection }: Props) => {
             <>
               <Progress className="rounded-none" value={45} />
               <div className="p-4 gap-3 flex flex-col">
-                {tasks.map((task) => (
-                  <div>Mocked task</div>
+                {collection.tasks.map((task) => (
+                  <div key={task.id}>{task.content}</div>
                 ))}
               </div>
             </>
@@ -98,7 +110,11 @@ const CollectionCard = ({ collection }: Props) => {
             {isLoading && <div>Deleting....</div>}
             {!isLoading && (
               <div>
-                <Button size={"icon"} variant={"ghost"}>
+                <Button
+                  size={"icon"}
+                  variant={"ghost"}
+                  onClick={() => setShowCreateModal(true)}
+                >
                   <PlusIcon />
                 </Button>
 
