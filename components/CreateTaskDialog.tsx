@@ -66,7 +66,7 @@ const CreateTaskDialog = ({ open, collection, setOpen }: Props) => {
 
       openChangeWrapper(false);
       router.refresh();
-    } catch (error) {
+    } catch (e) {
       toast({
         title: "Error",
         description: "Cannot create Task :(",
@@ -98,7 +98,10 @@ const CreateTaskDialog = ({ open, collection, setOpen }: Props) => {
 
         <div className="gap-4 py-4">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 flex flex-col"
+            >
               <FormField
                 name="content"
                 control={form.control}
@@ -112,13 +115,66 @@ const CreateTaskDialog = ({ open, collection, setOpen }: Props) => {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-                <FormItem></FormItem>
+              <FormField
+                control={form.control}
+                name="expiresAt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Expires At</FormLabel>
+                    <FormDescription>
+                      When should this task expire ?
+                    </FormDescription>
+                    <FormControl>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "justify-start text-left font-normal w-full",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value && format(field.value, "PPP")}
+                            {!field.value && <span>No expiration</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent>
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </form>
           </Form>
         </div>
+
+        <DialogFooter>
+          <Button
+            disabled={form.formState.isSubmitting}
+            className={cn(
+              "w-full dark:text-white text-white",
+              CollectionColors[collection.color as CollectionColor]
+            )}
+            onClick={form.handleSubmit(onSubmit)}
+          >
+            Confirm
+            {form.formState.isSubmitting && (
+              <ReloadIcon className="animate-spin h-4 w-4 ml-2" />
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
