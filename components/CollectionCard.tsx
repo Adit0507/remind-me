@@ -1,7 +1,7 @@
 "use client";
 
 import { Collection, Task } from "@prisma/client";
-import React, { useState, useTransition } from "react";
+import React, { useMemo, useState, useTransition } from "react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -30,6 +30,7 @@ import { CollectionColor, CollectionColors } from "@/lib/constants";
 import { CaretDownIcon, CaretUpIcon, TrashIcon } from "@radix-ui/react-icons";
 import { deleteCollection } from "@/actions/collection";
 import { useRouter } from "next/navigation";
+import TaskCard from "./TaskCard";
 
 interface Props {
   collection: Collection & {
@@ -63,9 +64,16 @@ const CollectionCard = ({ collection }: Props) => {
         variant: "destructive",
       });
     }
-
-    await deleteCollection(collection.id);
   };
+
+  const tasksDone = useMemo(() => {
+    return collection.tasks.filter((task) => task.done).length;
+  }, [collection.tasks]);
+
+  const progress =
+    collection.tasks.length === 0
+      ? 0
+      : (tasksDone / collection.tasks.length) * 100;
 
   return (
     <>
@@ -90,15 +98,31 @@ const CollectionCard = ({ collection }: Props) => {
           </Button>
         </CollapsibleTrigger>
 
-        <CollapsibleContent>
-          {tasks.length === 0 && <div>No tasks</div>}
+        <CollapsibleContent className="flex rounded-b-md flex-col dark:bg-neutral-900 shadow-lg">
+          {tasks.length === 0 && (
+            <Button
+              variant={"ghost"}
+              className="flex items-center justify-center gap-1 p-8 py-12 rounded-none"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <p>There are no tasks yet :</p>
+              <span
+                className={cn(
+                  "text-sm bg-clip-text text-transparent",
+                  CollectionColors[collection.color as CollectionColor]
+                )}
+              >
+                Create one
+              </span>
+            </Button>
+          )}
 
           {tasks.length > 0 && (
             <>
-              <Progress className="rounded-none" value={45} />
+              <Progress value={progress} className="rounded-none" />
               <div className="p-4 gap-3 flex flex-col">
-                {collection.tasks.map((task) => (
-                  <div key={task.id}>{task.content}</div>
+                {tasks.map((task) => (
+                  <TaskCard key={task.id} task={task} />
                 ))}
               </div>
             </>
@@ -107,7 +131,7 @@ const CollectionCard = ({ collection }: Props) => {
           <Separator />
           <footer className="h-[40px] px-4 p-[2px] text-xs text-neutral-500 flex justify-between items-center">
             <p>Created at {collection.createdAt.toLocaleDateString("en-US")}</p>
-            {isLoading && <div>Deleting....</div>}
+            {isLoading && <div className="font-bold">Deleting....</div>}
             {!isLoading && (
               <div>
                 <Button
