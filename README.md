@@ -1,4 +1,3 @@
 ## Demo
 
-https://github.com/Adit0507/remind-me/assets/78037846/75d880cf-2380-4ae7-81bd-7d943085dc38
-
+https://github.com/Adit0507/remind-me/assets/78037846/31a1fbe6-96eb-41f1-81cd-d47b6ed525c0
